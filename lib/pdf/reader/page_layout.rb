@@ -8,6 +8,9 @@ class PDF::Reader
   # media box should be a 4 number array that describes the dimensions of the
   # page to be rendered as described by the page's MediaBox attribute
   class PageLayout
+
+    attr_reader :runs
+
     def initialize(runs, mediabox)
       raise ArgumentError, "a mediabox must be provided" if mediabox.nil?
 

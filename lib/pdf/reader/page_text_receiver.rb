@@ -14,7 +14,7 @@ module PDF
 
       SPACE = " "
 
-      attr_reader :state, :content, :options
+      attr_reader :state, :content, :options, :characters
 
       ########## BEGIN FORWARDERS ##########
       # Graphics State Operators
@@ -45,8 +45,12 @@ module PDF
         @mediabox = page.objects.deref(page.attributes[:MediaBox])
       end
 
+      def page_layout
+        PageLayout.new(@characters, @mediabox)
+      end
+
       def content
-        PageLayout.new(@characters, @mediabox).to_s
+        page_layout.to_s
       end
 
       #####################################################
@@ -108,7 +112,7 @@ module PDF
           th = 1
           scaled_glyph_width = glyph_width * @state.font_size * th
           unless utf8_chars == SPACE
-            @characters << TextRun.new(newx, newy, scaled_glyph_width, @state.font_size, utf8_chars)
+            @characters << TextRun.new(newx, newy, scaled_glyph_width, @state.font_size, @state.current_font.basefont, utf8_chars)
           end
           @state.process_glyph_displacement(glyph_width, 0, utf8_chars == SPACE)
         end

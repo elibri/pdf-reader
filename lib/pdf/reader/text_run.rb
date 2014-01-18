@@ -5,16 +5,17 @@ class PDF::Reader
   class TextRun
     include Comparable
 
-    attr_reader :x, :y, :width, :font_size, :text
+    attr_reader :x, :y, :width, :font_size, :text, :font_name
 
     alias :to_s :text
 
-    def initialize(x, y, width, font_size, text)
+    def initialize(x, y, width, font_size, font_name, text)
       @x = x
       @y = y
       @width = width
       @font_size = font_size.floor
       @text = text
+      @font_name = font_name
     end
 
     # Allows collections of TextRun objects to be sorted. They will be sorted
@@ -42,21 +43,21 @@ class PDF::Reader
     end
 
     def mergable?(other)
-      y.to_i == other.y.to_i && font_size == other.font_size && mergable_range.include?(other.x)
+      y.to_i == other.y.to_i && font_size == other.font_size && font_name == other.font_name && mergable_range.include?(other.x)
     end
 
     def +(other)
       raise ArgumentError, "#{other} cannot be merged with this run" unless mergable?(other)
 
       if (other.x - endx) <( font_size * 0.2)
-        TextRun.new(x, y, other.endx - x, font_size, text + other.text)
+        TextRun.new(x, y, other.endx - x, font_size, font_name, text + other.text)
       else
-        TextRun.new(x, y, other.endx - x, font_size, "#{text} #{other.text}")
+        TextRun.new(x, y, other.endx - x, font_size, font_name, "#{text} #{other.text}")
       end
     end
 
     def inspect
-      "#{text} w:#{width} f:#{font_size} @#{x},#{y}"
+      "#{text} w:#{width.round(2)} f:#{font_size} fn:#{font_name} @#{x.round(2)},#{y.round(2)}"
     end
 
     private
